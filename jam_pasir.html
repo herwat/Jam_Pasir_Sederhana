@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jam Pasir & Catatan</title>
+  <style>
+    :root {
+      --bg-color: #ffc0cb;
+      --text-color: #000;
+      --sand-color: #f0a;
+    }
+
+    body.dark {
+      --bg-color: #2c2c2c;
+      --text-color: #fff;
+      --sand-color: #ff69b4;
+    }
+
+    body {
+      font-family: sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      text-align: center;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #timerSettings {
+      margin-bottom: 20px;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    #hourglass {
+      width: 100px;
+      height: 200px;
+      border: 4px solid #fff;
+      border-radius: 50px;
+      margin: 20px auto;
+      position: relative;
+      background: linear-gradient(to bottom, #fff 50%, var(--sand-color) 50%);
+      overflow: hidden;
+    }
+
+    #sand {
+      width: 100%;
+      height: 50%;
+      background: var(--sand-color);
+      position: absolute;
+      bottom: 0;
+      transition: height 1s linear;
+    }
+
+    .calendar {
+      margin-top: 40px;
+    }
+
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin-top: 10px;
+    }
+
+    iframe {
+      display: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+    #themeToggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <button id="themeToggle">🌙 Tema</button>
+  <h1>Jam Pasir Hitung Mundur</h1>
+
+  <div id="timerSettings">
+    <label>Jam: <input type="number" id="hours" min="0" value="0"></label>
+    <label>Menit: <input type="number" id="minutes" min="0" value="0"></label>
+    <label>Detik: <input type="number" id="seconds" min="0" value="10"></label>
+    <button onclick="startTimer()">Mulai Timer</button>
+    <button onclick="playMusic()">Putar Musik</button>
+  </div>
+
+  <div id="hourglass">
+    <div id="sand"></div>
+  </div>
+
+  <h2>Kalender & Catatan</h2>
+  <div class="calendar">
+    <input type="date" id="noteDate">
+    <br>
+    <textarea id="noteText" placeholder="Tulis catatan..."></textarea>
+    <br>
+    <button onclick="saveNote()">Simpan Catatan</button>
+    <button onclick="loadNote()">Lihat Catatan</button>
+  </div>
+
+  <iframe id="bgmusic" src="https://www.youtube.com/embed/6DS7wnDx9Yc?autoplay=1&loop=1&playlist=6DS7wnDx9Yc&controls=0" allow="autoplay" allowfullscreen></iframe>
+
+  <audio id="alarmSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+  <script>
+    let countdownInterval;
+
+    function startTimer() {
+      const h = parseInt(document.getElementById('hours').value) || 0;
+      const m = parseInt(document.getElementById('minutes').value) || 0;
+      const s = parseInt(document.getElementById('seconds').value) || 0;
+      let totalSeconds = h * 3600 + m * 60 + s;
+
+      if (totalSeconds <= 0) return;
+
+      const sand = document.getElementById("sand");
+      sand.style.height = "100%";
+
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        totalSeconds--;
+        const percent = (totalSeconds / (h * 3600 + m * 60 + s)) * 100;
+        sand.style.height = percent + "%";
+
+        if (totalSeconds <= 0) {
+          clearInterval(countdownInterval);
+          alert("Waktu Habis!");
+          document.getElementById("alarmSound").play();
+        }
+      }, 1000);
+    }
+
+    function playMusic() {
+      const iframe = document.getElementById("bgmusic");
+      iframe.style.display = "block";
+    }
+
+    function saveNote() {
+      const date = document.getElementById("noteDate").value;
+      const text = document.getElementById("noteText").value;
+      if (!date) return alert("Pilih tanggal dulu!");
+      localStorage.setItem("note_" + date, text);
+      alert("Catatan disimpan!");
+    }
+
+    function loadNote() {
+      const date = document.getElementById("noteDate").value;
+      if (!date) return alert("Pilih tanggal dulu!");
+      const saved = localStorage.getItem("note_" + date) || "";
+      document.getElementById("noteText").value = saved;
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
+  </script>
+</body>
+</html>
